@@ -1,0 +1,10 @@
+{
+  "description": "Effortlessly manage tasks with a clean, minimalistic interface that allows users to add, complete, and delete tasks, including voice input for convenience.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
