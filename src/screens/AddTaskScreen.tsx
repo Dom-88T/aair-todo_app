@@ -8,7 +8,7 @@
 import { useState, useRef, useEffect } from "react";
 
 interface Props {
-  onSave: (title: string, description?: string) => void;
+  onSave: (title: string, description?: string) => boolean;
   onBack: () => void;
 }
 
@@ -30,8 +30,14 @@ export default function AddTaskScreen({ onSave, onBack }: Props) {
       setError("Task title is required.");
       return;
     }
+
+    const saved = onSave(trimmed, description.trim() || undefined);
+    if (!saved) {
+      setError("This exact task already exists.");
+      return;
+    }
+
     setError("");
-    onSave(trimmed, description.trim() || undefined);
     onBack(); // return to the list after saving
   }
 

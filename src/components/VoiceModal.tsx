@@ -1,35 +1,21 @@
-// ─── VoiceModal Component ──────────────────────────────────────────────────────
-// A bottom-sheet modal that activates when the user taps the mic FAB.
-//
-// Flow:
-//   1. Modal opens → listening starts automatically
-//   2. User speaks  → transcript appears in real time
-//   3. User taps "Done" (or recording stops) → tasks are split and added
-//
-// Uses the browser's built-in Web Speech API (SpeechRecognition).
-// In a real Expo app this would use expo-speech or react-native-voice.
-
 import { useEffect, useRef, useState } from "react";
 import { splitIntoTasks } from "../utils/taskSplitter";
 
 interface Props {
-  onAddTasks: (titles: string[]) => void; // called with the parsed task list
+  onAddTasks: (titles: string[]) => void;
   onClose: () => void;
 }
 
-// Typed reference to the browser's SpeechRecognition API
-// (prefixed in some browsers)
 const SpeechRecognitionAPI =
   (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
 export default function VoiceModal({ onAddTasks, onClose }: Props) {
-  const [transcript, setTranscript] = useState(""); // live transcription text
+  const [transcript, setTranscript] = useState("");
   const [isListening, setIsListening] = useState(false);
-  const [preview, setPreview] = useState<string[]>([]); // tasks that will be created
+  const [preview, setPreview] = useState<string[]>([]);
   const [supported, setSupported] = useState(true);
   const recognitionRef = useRef<any>(null);
 
-  // Start listening as soon as the modal mounts
   useEffect(() => {
     if (!SpeechRecognitionAPI) {
       setSupported(false);
@@ -38,21 +24,18 @@ export default function VoiceModal({ onAddTasks, onClose }: Props) {
 
     const recognition = new SpeechRecognitionAPI();
     recognition.lang = "en-US";
-    recognition.interimResults = true; // show partial transcript while speaking
-    recognition.continuous = false; // stop after one sentence
+    recognition.interimResults = true;
+    recognition.continuous = false;
 
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
 
     recognition.onresult = (event: any) => {
-      // Concatenate all recognised segments into one string
-      // e.g. "Buy milk" + " and call mom" → "Buy milk and call mom"
       const text = Array.from(event.results as SpeechRecognitionResultList)
         .map((result) => result[0].transcript)
         .join(" ");
 
       setTranscript(text);
-      // Live-preview the task split so the user can see what will be created
       setPreview(splitIntoTasks(text));
     };
 
@@ -61,7 +44,6 @@ export default function VoiceModal({ onAddTasks, onClose }: Props) {
     recognitionRef.current = recognition;
     recognition.start();
 
-    // Stop listening when the modal closes
     return () => {
       recognition.stop();
     };
@@ -83,11 +65,8 @@ export default function VoiceModal({ onAddTasks, onClose }: Props) {
   }
 
   return (
-    // Backdrop — tapping outside closes the modal
     <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label="Voice input">
       <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
-
-        {/* ── Header ── */}
         <div className="modal-header">
           <span className="modal-title">Voice Input</span>
           <button className="modal-close" onClick={onClose} aria-label="Close voice input">
@@ -97,7 +76,6 @@ export default function VoiceModal({ onAddTasks, onClose }: Props) {
           </button>
         </div>
 
-        {/* ── Mic animation ── */}
         <div className="voice-mic-wrap">
           <div className={`voice-mic-ring ${isListening ? "pulse" : ""}`}>
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
@@ -122,7 +100,6 @@ export default function VoiceModal({ onAddTasks, onClose }: Props) {
           </p>
         </div>
 
-        {/* ── Live transcript ── */}
         {transcript ? (
           <div className="voice-transcript">
             <p className="voice-transcript-label">You said:</p>
@@ -130,7 +107,6 @@ export default function VoiceModal({ onAddTasks, onClose }: Props) {
           </div>
         ) : null}
 
-        {/* ── Task preview ── tasks that will be added */}
         {preview.length > 0 && (
           <div className="voice-preview">
             <p className="voice-preview-label">
@@ -147,14 +123,12 @@ export default function VoiceModal({ onAddTasks, onClose }: Props) {
           </div>
         )}
 
-        {/* ── Browser not supported ── */}
         {!supported && (
           <p className="voice-unsupported">
             Try Chrome or Edge for voice input support.
           </p>
         )}
 
-        {/* ── Actions ── */}
         <div className="modal-actions">
           {supported && !isListening && (
             <button className="btn-secondary" onClick={handleRetry}>

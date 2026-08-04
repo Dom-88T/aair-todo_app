@@ -1,13 +1,3 @@
-// ─── TaskListScreen ─────────────────────────────────────────────────────────────
-// The main screen of the app — shows all tasks and the two FABs.
-//
-// Layout (top → bottom):
-//   Header  — title + task count
-//   Search  — live filter bar
-//   List    — incomplete tasks, then completed tasks, or an EmptyState
-//   FABs    — voice mic (left) + add task (right)
-//   VoiceModal — shown on top when mic FAB is tapped
-
 import { useState, useMemo } from "react";
 import { Task } from "../types";
 import TaskItem from "../components/TaskItem";
@@ -33,27 +23,24 @@ export default function TaskListScreen({
   const [showVoice, setShowVoice] = useState(false);
   const [search, setSearch] = useState("");
 
-  // Filter tasks by search query — case-insensitive match on title or description
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return tasks;
+
     return tasks.filter(
-      (t) =>
-        t.title.toLowerCase().includes(q) ||
-        t.description?.toLowerCase().includes(q)
+      (task) =>
+        task.title.toLowerCase().includes(q) ||
+        task.description?.toLowerCase().includes(q)
     );
   }, [tasks, search]);
 
-  // Split into two groups so completed tasks sink to the bottom (like iOS Reminders)
-  const incomplete = filtered.filter((t) => !t.completed);
-  const completed = filtered.filter((t) => t.completed);
-
+  const incomplete = filtered.filter((task) => !task.completed);
+  const completed = filtered.filter((task) => task.completed);
   const totalCount = tasks.length;
-  const doneCount = tasks.filter((t) => t.completed).length;
+  const doneCount = tasks.filter((task) => task.completed).length;
 
   return (
     <div className="screen">
-      {/* ── Header ── */}
       <header className="screen-header">
         <div>
           <h1 className="screen-title">My Tasks</h1>
@@ -65,7 +52,6 @@ export default function TaskListScreen({
         </div>
       </header>
 
-      {/* ── Search bar ── */}
       {tasks.length > 0 && (
         <div className="search-wrap">
           <svg className="search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none">
@@ -92,10 +78,8 @@ export default function TaskListScreen({
         </div>
       )}
 
-      {/* ── Task list ── */}
       <div className="task-list">
         {filtered.length === 0 ? (
-          // No results for this search term, or no tasks at all
           search ? (
             <p className="no-results">No tasks match "{search}"</p>
           ) : (
@@ -103,7 +87,6 @@ export default function TaskListScreen({
           )
         ) : (
           <>
-            {/* Incomplete tasks first */}
             {incomplete.map((task) => (
               <TaskItem
                 key={task.id}
@@ -113,7 +96,6 @@ export default function TaskListScreen({
               />
             ))}
 
-            {/* Completed section header — only shown if there are completed tasks */}
             {completed.length > 0 && (
               <>
                 <div className="section-divider">
@@ -133,13 +115,9 @@ export default function TaskListScreen({
         )}
       </div>
 
-      {/* ── FABs ── */}
-      {/* Voice mic — bottom left */}
       <FAB type="voice" onPress={() => setShowVoice(true)} />
-      {/* Add task — bottom right */}
       <FAB type="add" onPress={onNavigateToAdd} />
 
-      {/* ── Voice modal ── rendered on top of everything */}
       {showVoice && (
         <VoiceModal
           onAddTasks={(titles) => {
