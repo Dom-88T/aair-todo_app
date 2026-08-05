@@ -230,7 +230,6 @@ input, textarea {
 }
 .search-clear:hover { color: var(--text-primary); }
 
-<<<<<<< HEAD
 .task-list {
   flex: 1;
   overflow-y: auto;
