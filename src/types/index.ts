@@ -6,4 +6,4 @@ export interface Task {
   createdAt: number;
 }
 
-export type Screen = "TaskList" | "AddTask";
+export type Screen = "TaskList" | "AddTask" | "EditTask";

@@ -6,29 +6,75 @@ interface Props {
   onClose: () => void;
 }
 
-const SpeechRecognitionAPI =
-  (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-
 export default function VoiceModal({ onAddTasks, onClose }: Props) {
   const [transcript, setTranscript] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [preview, setPreview] = useState<string[]>([]);
   const [supported, setSupported] = useState(true);
   const recognitionRef = useRef<any>(null);
+  const stopTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
+    const SpeechRecognitionAPI =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognitionAPI) {
+      setSupported(false);
+    }
+
+    return () => {
+      if (stopTimeoutRef.current) {
+        window.clearTimeout(stopTimeoutRef.current);
+      }
+      recognitionRef.current?.stop();
+    };
+  }, []);
+
+  function clearStopTimer() {
+    if (stopTimeoutRef.current) {
+      window.clearTimeout(stopTimeoutRef.current);
+      stopTimeoutRef.current = null;
+    }
+  }
+
+  function scheduleStop() {
+    clearStopTimer();
+    stopTimeoutRef.current = window.setTimeout(() => {
+      recognitionRef.current?.stop();
+    }, 18000);
+  }
+
+  function startListening() {
+    const SpeechRecognitionAPI =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
     if (!SpeechRecognitionAPI) {
       setSupported(false);
       return;
     }
 
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {
+        // Ignore issues while restarting the recorder.
+      }
+    }
+
     const recognition = new SpeechRecognitionAPI();
     recognition.lang = "en-US";
     recognition.interimResults = true;
-    recognition.continuous = false;
+    recognition.continuous = true;
+    recognition.maxAlternatives = 1;
 
-    recognition.onstart = () => setIsListening(true);
-    recognition.onend = () => setIsListening(false);
+    recognition.onstart = () => {
+      setIsListening(true);
+      scheduleStop();
+    };
+    recognition.onend = () => {
+      setIsListening(false);
+      clearStopTimer();
+    };
 
     recognition.onresult = (event: any) => {
       const text = Array.from(event.results as SpeechRecognitionResultList)
@@ -37,28 +83,24 @@ export default function VoiceModal({ onAddTasks, onClose }: Props) {
 
       setTranscript(text);
       setPreview(splitIntoTasks(text));
+      scheduleStop();
     };
 
-    recognition.onerror = () => setIsListening(false);
+    recognition.onerror = (event: any) => {
+      if (event.error === "no-speech" || event.error === "aborted") {
+        return;
+      }
+      setIsListening(false);
+    };
 
     recognitionRef.current = recognition;
-
-    return () => {
-      recognition.stop();
-    };
-  }, []);
-
-  function startListening() {
-    const recognition = recognitionRef.current;
-    if (!recognition || !supported) return;
 
     try {
       setTranscript("");
       setPreview([]);
-      recognition.stop();
       recognition.start();
     } catch {
-      // Ignore if the browser is already starting the microphone.
+      setIsListening(false);
     }
   }
 
@@ -88,18 +130,12 @@ export default function VoiceModal({ onAddTasks, onClose }: Props) {
         </div>
 
         <div className="voice-mic-wrap">
-          <div
+          <button
+            type="button"
             className={`voice-mic-ring ${isListening ? "pulse" : ""}`}
             onClick={supported ? startListening : undefined}
-            onKeyDown={(event) => {
-              if (supported && (event.key === "Enter" || event.key === " ")) {
-                event.preventDefault();
-                startListening();
-              }
-            }}
-            role="button"
-            tabIndex={supported ? 0 : -1}
             aria-label="Start voice input"
+            disabled={!supported}
           >
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
               <rect x="11" y="3" width="10" height="16" rx="5" fill={isListening ? "#111" : "#ccc"} />
@@ -111,7 +147,7 @@ export default function VoiceModal({ onAddTasks, onClose }: Props) {
               />
               <line x1="16" y1="26" x2="16" y2="30" stroke={isListening ? "#111" : "#ccc"} strokeWidth="1.8" strokeLinecap="round" />
             </svg>
-          </div>
+          </button>
           <p className="voice-status">
             {!supported
               ? "Speech recognition not supported in this browser."

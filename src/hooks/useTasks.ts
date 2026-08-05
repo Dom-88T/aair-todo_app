@@ -72,6 +72,36 @@ export function useTasks() {
     setTasks((prev) => [...newTasks, ...prev]);
   }, []);
 
+  const updateTask = useCallback((id: string, title: string, description?: string): boolean => {
+    const normalizedTitle = normalizeText(title);
+    const normalizedDescription = normalizeText(description);
+
+    const duplicateExists = tasks.some(
+      (task) =>
+        task.id !== id &&
+        normalizeText(task.title) === normalizedTitle &&
+        normalizeText(task.description) === normalizedDescription
+    );
+
+    if (duplicateExists) {
+      return false;
+    }
+
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === id
+          ? {
+              ...task,
+              title: title.trim(),
+              description: description?.trim() || undefined,
+            }
+          : task
+      )
+    );
+
+    return true;
+  }, [tasks]);
+
   const toggleTask = useCallback((id: string) => {
     setTasks((prev) =>
       prev.map((task) =>
@@ -84,5 +114,5 @@ export function useTasks() {
     setTasks((prev) => prev.filter((task) => task.id !== id));
   }, []);
 
-  return { tasks, addTask, addManyTasks, toggleTask, deleteTask };
+  return { tasks, addTask, updateTask, addManyTasks, toggleTask, deleteTask };
 }

@@ -5,9 +5,10 @@ interface Props {
   task: Task;
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
+  onEdit: (task: Task) => void;
 }
 
-export default function TaskItem({ task, onToggle, onDelete }: Props) {
+export default function TaskItem({ task, onToggle, onDelete, onEdit }: Props) {
   const [deleting, setDeleting] = useState(false);
 
   function handleDelete() {
@@ -64,21 +65,40 @@ export default function TaskItem({ task, onToggle, onDelete }: Props) {
         )}
       </div>
 
-      <button
-        className="task-delete"
-        onClick={handleDelete}
-        aria-label={`Delete task: ${task.title}`}
-      >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path
-            d="M3 4h10M6 4V2.5a.5.5 0 01.5-.5h3a.5.5 0 01.5.5V4M5.5 7v5M8 7v5M10.5 7v5M4.5 4l.5 9h6l.5-9"
-            stroke="#bbb"
-            strokeWidth="1.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
+      <div className="task-actions">
+        <button
+          className="task-edit"
+          onClick={() => onEdit(task)}
+          aria-label={`Edit task: ${task.title}`}
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <path
+              d="M10.5 2.5l3 3L5.5 13.5l-4 1 1-4 8-8z"
+              stroke="#888"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path d="M9.5 3.5l3 3" stroke="#888" strokeWidth="1.2" strokeLinecap="round" />
+          </svg>
+        </button>
+
+        <button
+          className="task-delete"
+          onClick={handleDelete}
+          aria-label={`Delete task: ${task.title}`}
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path
+              d="M3 4h10M6 4V2.5a.5.5 0 01.5-.5h3a.5.5 0 01.5.5V4M5.5 7v5M8 7v5M10.5 7v5M4.5 4l.5 9h6l.5-9"
+              stroke="#bbb"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }

@@ -9,6 +9,7 @@ interface Props {
   tasks: Task[];
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
+  onEdit: (task: Task) => void;
   onAddMany: (titles: string[]) => void;
   onNavigateToAdd: () => void;
 }
@@ -17,6 +18,7 @@ export default function TaskListScreen({
   tasks,
   onToggle,
   onDelete,
+  onEdit,
   onAddMany,
   onNavigateToAdd,
 }: Props) {
@@ -93,6 +95,7 @@ export default function TaskListScreen({
                 task={task}
                 onToggle={onToggle}
                 onDelete={onDelete}
+                onEdit={onEdit}
               />
             ))}
 
@@ -107,6 +110,7 @@ export default function TaskListScreen({
                     task={task}
                     onToggle={onToggle}
                     onDelete={onDelete}
+                    onEdit={onEdit}
                   />
                 ))}
               </>

@@ -3,17 +3,28 @@ import { useState, useRef, useEffect } from "react";
 interface Props {
   onSave: (title: string, description?: string) => boolean;
   onBack: () => void;
+  mode?: "create" | "edit";
+  initialTitle?: string;
+  initialDescription?: string;
 }
 
-export default function AddTaskScreen({ onSave, onBack }: Props) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+export default function AddTaskScreen({
+  onSave,
+  onBack,
+  mode = "create",
+  initialTitle = "",
+  initialDescription = "",
+}: Props) {
+  const [title, setTitle] = useState(initialTitle);
+  const [description, setDescription] = useState(initialDescription);
   const [error, setError] = useState("");
 
   const titleRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
+    setTitle(initialTitle);
+    setDescription(initialDescription);
     titleRef.current?.focus();
-  }, []);
+  }, [initialTitle, initialDescription]);
 
   function handleSave() {
     const trimmed = title.trim();
@@ -55,7 +66,9 @@ export default function AddTaskScreen({ onSave, onBack }: Props) {
           <span>Back</span>
         </button>
 
-        <h1 className="screen-title screen-title--center">New Task</h1>
+        <h1 className="screen-title screen-title--center">
+          {mode === "edit" ? "Edit Task" : "New Task"}
+        </h1>
 
         <button
           className="save-btn"

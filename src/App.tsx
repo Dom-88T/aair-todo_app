@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Screen } from "./types";
+import { Screen, Task } from "./types";
 import { useTasks } from "./hooks/useTasks";
 import TaskListScreen from "./screens/TaskListScreen";
 import AddTaskScreen from "./screens/AddTaskScreen";
@@ -7,13 +7,24 @@ import AddTaskScreen from "./screens/AddTaskScreen";
 export default function App() {
   const [screen, setScreen] = useState<Screen>("TaskList");
   const [direction, setDirection] = useState<"forward" | "back">("forward");
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   function navigateTo(next: Screen, dir: "forward" | "back" = "forward") {
     setDirection(dir);
     setScreen(next);
   }
 
-  const { tasks, addTask, addManyTasks, toggleTask, deleteTask } = useTasks();
+  const { tasks, addTask, updateTask, addManyTasks, toggleTask, deleteTask } = useTasks();
+
+  function handleOpenEdit(task: Task) {
+    setEditingTask(task);
+    navigateTo("EditTask", "forward");
+  }
+
+  function handleBackFromEditor() {
+    setEditingTask(null);
+    navigateTo("TaskList", "back");
+  }
 
   return (
     <div className="app-shell">
@@ -30,13 +41,21 @@ export default function App() {
               tasks={tasks}
               onToggle={toggleTask}
               onDelete={deleteTask}
+              onEdit={handleOpenEdit}
               onAddMany={addManyTasks}
               onNavigateToAdd={() => navigateTo("AddTask", "forward")}
             />
           ) : (
             <AddTaskScreen
-              onSave={addTask}
-              onBack={() => navigateTo("TaskList", "back")}
+              mode={screen === "EditTask" ? "edit" : "create"}
+              initialTitle={editingTask?.title ?? ""}
+              initialDescription={editingTask?.description ?? ""}
+              onSave={
+                screen === "EditTask" && editingTask
+                  ? (title, description) => updateTask(editingTask.id, title, description)
+                  : addTask
+              }
+              onBack={handleBackFromEditor}
             />
           )}
         </div>
