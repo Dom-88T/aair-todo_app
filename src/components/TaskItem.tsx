@@ -1,14 +1,3 @@
-// ─── TaskItem Component ────────────────────────────────────────────────────────
-// Renders a single row in the task list.
-//
-// Visual states:
-//   Incomplete → black title, grey description, empty circle checkbox
-//   Complete   → grey struck-through title, filled circle checkbox
-//
-// Interaction:
-//   Tap checkbox → toggles complete/incomplete
-//   Tap trash    → deletes the task
-
 import { useState } from "react";
 import { Task } from "../types";
 
@@ -19,12 +8,10 @@ interface Props {
 }
 
 export default function TaskItem({ task, onToggle, onDelete }: Props) {
-  // Controls the brief "shake" animation when the user deletes a task
   const [deleting, setDeleting] = useState(false);
 
   function handleDelete() {
     setDeleting(true);
-    // Wait for the fade-out transition before removing from state
     setTimeout(() => onDelete(task.id), 250);
   }
 
@@ -37,7 +24,6 @@ export default function TaskItem({ task, onToggle, onDelete }: Props) {
         transition: "opacity 0.25s ease, transform 0.25s ease",
       }}
     >
-      {/* ── Checkbox ── */}
       <button
         className="task-checkbox"
         onClick={() => onToggle(task.id)}
@@ -45,7 +31,6 @@ export default function TaskItem({ task, onToggle, onDelete }: Props) {
         aria-pressed={task.completed}
       >
         {task.completed ? (
-          // Filled circle with a checkmark — task is done (e.g. "Buy milk" is bought)
           <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
             <circle cx="11" cy="11" r="11" fill="#111" />
             <path
@@ -57,19 +42,17 @@ export default function TaskItem({ task, onToggle, onDelete }: Props) {
             />
           </svg>
         ) : (
-          // Empty circle — task is pending
           <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
             <circle cx="11" cy="11" r="10" stroke="#ccc" strokeWidth="1.5" />
           </svg>
         )}
       </button>
 
-      {/* ── Task text ── */}
+      {/* Task text */}
       <div className="task-content">
         <span
           className="task-title"
           style={{
-            // Strike-through when done, like crossing off "Call dentist" on paper
             textDecoration: task.completed ? "line-through" : "none",
             color: task.completed ? "#aaa" : "#111",
           }}
@@ -83,7 +66,7 @@ export default function TaskItem({ task, onToggle, onDelete }: Props) {
         )}
       </div>
 
-      {/* ── Delete button ── */}
+      {/* Delete button */}
       <button
         className="task-delete"
         onClick={handleDelete}
