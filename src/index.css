@@ -234,9 +234,15 @@ input, textarea {
   flex: 1;
   overflow-y: auto;
   padding: 8px 0 100px;
-  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 .task-list::-webkit-scrollbar { display: none; }
+
+@supports (scrollbar-width: none) {
+  .task-list {
+    scrollbar-width: none;
+  }
+}
 
 .task-item {
   display: flex;
@@ -561,9 +567,15 @@ input, textarea {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 .form-body::-webkit-scrollbar { display: none; }
+
+@supports (scrollbar-width: none) {
+  .form-body {
+    scrollbar-width: none;
+  }
+}
 
 .form-group {
   display: flex;
