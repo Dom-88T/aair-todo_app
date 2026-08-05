@@ -48,7 +48,6 @@ export default function TaskItem({ task, onToggle, onDelete }: Props) {
         )}
       </button>
 
-      {/* Task text */}
       <div className="task-content">
         <span
           className="task-title"
@@ -60,13 +59,11 @@ export default function TaskItem({ task, onToggle, onDelete }: Props) {
           {task.title}
         </span>
 
-        {/* Optional description, shown only if the user typed one */}
         {task.description && (
           <span className="task-description">{task.description}</span>
         )}
       </div>
 
-      {/* Delete button */}
       <button
         className="task-delete"
         onClick={handleDelete}

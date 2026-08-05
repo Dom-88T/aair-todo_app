@@ -1,7 +1,6 @@
 export default function EmptyState() {
   return (
     <div className="empty-state">
-      {/*inbox icon */}
       <svg
         width="48"
         height="48"
