@@ -42,12 +42,25 @@ export default function VoiceModal({ onAddTasks, onClose }: Props) {
     recognition.onerror = () => setIsListening(false);
 
     recognitionRef.current = recognition;
-    recognition.start();
 
     return () => {
       recognition.stop();
     };
   }, []);
+
+  function startListening() {
+    const recognition = recognitionRef.current;
+    if (!recognition || !supported) return;
+
+    try {
+      setTranscript("");
+      setPreview([]);
+      recognition.stop();
+      recognition.start();
+    } catch {
+      // Ignore if the browser is already starting the microphone.
+    }
+  }
 
   function handleDone() {
     recognitionRef.current?.stop();
@@ -59,9 +72,7 @@ export default function VoiceModal({ onAddTasks, onClose }: Props) {
   }
 
   function handleRetry() {
-    setTranscript("");
-    setPreview([]);
-    recognitionRef.current?.start();
+    startListening();
   }
 
   return (
@@ -77,7 +88,19 @@ export default function VoiceModal({ onAddTasks, onClose }: Props) {
         </div>
 
         <div className="voice-mic-wrap">
-          <div className={`voice-mic-ring ${isListening ? "pulse" : ""}`}>
+          <div
+            className={`voice-mic-ring ${isListening ? "pulse" : ""}`}
+            onClick={supported ? startListening : undefined}
+            onKeyDown={(event) => {
+              if (supported && (event.key === "Enter" || event.key === " ")) {
+                event.preventDefault();
+                startListening();
+              }
+            }}
+            role="button"
+            tabIndex={supported ? 0 : -1}
+            aria-label="Start voice input"
+          >
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
               <rect x="11" y="3" width="10" height="16" rx="5" fill={isListening ? "#111" : "#ccc"} />
               <path
@@ -96,7 +119,7 @@ export default function VoiceModal({ onAddTasks, onClose }: Props) {
               ? "Listening…"
               : transcript
               ? "Done listening"
-              : "Tap retry to listen again"}
+              : "Tap the mic to start listening"}
           </p>
         </div>
 
