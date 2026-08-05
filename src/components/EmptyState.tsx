@@ -1,11 +1,7 @@
-// ─── EmptyState Component ──────────────────────────────────────────────────────
-// Shown when the task list is empty — prompts the user to add their first task.
-// Equivalent to a "no items" placeholder screen in a real mobile app.
-
 export default function EmptyState() {
   return (
     <div className="empty-state">
-      {/* Simple inbox-style icon */}
+      {/*inbox icon */}
       <svg
         width="48"
         height="48"
